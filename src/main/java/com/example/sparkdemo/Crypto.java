@@ -1,6 +1,5 @@
 package com.example.sparkdemo;
 
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 
@@ -11,37 +10,30 @@ import javax.xml.bind.DatatypeConverter;
 
 public class Crypto {
 
-    private final Key key;
-    private final GCMParameterSpec gcmParameterSpec;
+    private Key key;
+    private GCMParameterSpec gcmParameterSpec;
 
-    public Crypto(String keyValue) {
-        byte[] keyBytes = keyValue.getBytes(StandardCharsets.UTF_8);
+    public Crypto() {
+        byte[] keyBytes = "YELLOW_SUBMARINE".getBytes();
         key = new SecretKeySpec(keyBytes, "AES");
-        gcmParameterSpec = new GCMParameterSpec(128, keyBytes);        
-    }
-
-    public String encrypt(final String data) {
-        byte[] pt = data.getBytes();
-        byte[] ct = transform(pt, Cipher.ENCRYPT_MODE);
-        
-        return DatatypeConverter.printHexBinary(ct).toLowerCase();
-    }
-
-    public String decrypt(final String data) {
-        byte[] ct = DatatypeConverter.parseHexBinary(data);
-        byte[] pt = transform(ct, Cipher.DECRYPT_MODE);
-        
-        return new String(pt);
+        gcmParameterSpec = new GCMParameterSpec(128, keyBytes);
     }
 
     private synchronized byte[] transform(byte[] data, int mode) {
         try {
             Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
             cipher.init(mode, key, gcmParameterSpec);
-//            cipher.updateAAD("".getBytes(StandardCharsets.UTF_8));
             return cipher.doFinal(data);
         } catch (GeneralSecurityException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public String encrypt(String data) {
+        return DatatypeConverter.printHexBinary(transform(data.getBytes(), Cipher.ENCRYPT_MODE)).toLowerCase();
+    }
+
+    public String decrypt(String data) {
+        return new String(transform(DatatypeConverter.parseHexBinary(data), Cipher.DECRYPT_MODE));
     }
 }

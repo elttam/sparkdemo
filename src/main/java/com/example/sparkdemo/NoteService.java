@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 public class NoteService {
 
     private final Map<String, Note> notes = new HashMap<>(); // mock'ed db
-    private final Crypto crypto = new Crypto("YELLOW_SUBMARINE");
+    private final Crypto crypto = new Crypto();
     private int counter = 0;
     
     public NoteService() {
